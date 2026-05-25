@@ -67,7 +67,7 @@ function deepMerge(target: Record<string, any>, source: Record<string, any>): Re
   return result
 }
 
-export async function updateBrandingAction(formData: FormData) {
+export async function updateBrandingAction(formData: FormData): Promise<{ success: boolean; error: string | null }> {
   const { org } = await requirePanelAuth()
 
   // Build a nested object from all form fields
@@ -113,11 +113,15 @@ export async function updateBrandingAction(formData: FormData) {
   const existingSettings = (org.settings as Record<string, any>) ?? {}
   const mergedSettings = deepMerge(existingSettings, newSettings)
 
-  await prisma.organization.update({
-    where: { id: org.id },
-    data: { settings: mergedSettings },
-  })
+  try {
+    await prisma.organization.update({
+      where: { id: org.id },
+      data: { settings: mergedSettings },
+    })
+  } catch {
+    return { success: false, error: 'Error al guardar los cambios' }
+  }
 
   revalidatePath('/panel/apariencia')
-  return { success: true }
+  return { success: true, error: null }
 }
