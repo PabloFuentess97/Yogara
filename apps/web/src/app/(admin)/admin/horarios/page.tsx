@@ -3,6 +3,8 @@ import { requireAdmin } from '@/lib/admin-auth'
 import { CrearHorarioForm } from './crear-horario-form'
 import { GenerarSesionesButton } from './generar-sesiones-button'
 
+export const dynamic = 'force-dynamic'
+
 const DAY_LABELS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
 
 export default async function AdminHorariosPage() {

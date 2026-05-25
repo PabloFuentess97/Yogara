@@ -2,6 +2,8 @@ import { prisma } from '@yogara/database'
 import { requireAdmin } from '@/lib/admin-auth'
 import { startOfDay, endOfDay, startOfWeek, endOfWeek } from 'date-fns'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminDashboardPage() {
   const { organizationId } = await requireAdmin()
 

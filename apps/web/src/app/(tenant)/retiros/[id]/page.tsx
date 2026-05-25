@@ -5,6 +5,8 @@ import { resolveTenant } from '@/lib/tenant'
 import { optionalStudent } from '@/lib/student-auth'
 import { RetreatBookingButton } from '../booking-button'
 
+export const dynamic = 'force-dynamic'
+
 interface PageProps {
   params: Promise<{ id: string }>
 }

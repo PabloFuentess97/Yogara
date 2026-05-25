@@ -1,6 +1,8 @@
 import { prisma } from '@yogara/database'
 import { requireAdmin } from '@/lib/admin-auth'
 
+export const dynamic = 'force-dynamic'
+
 interface Props {
   searchParams: Promise<{ search?: string }>
 }

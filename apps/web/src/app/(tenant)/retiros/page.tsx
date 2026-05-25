@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { prisma } from '@yogara/database'
 import { resolveTenant } from '@/lib/tenant'
 
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata(): Promise<Metadata> {
   const org = await resolveTenant()
   return {

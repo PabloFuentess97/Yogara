@@ -6,6 +6,8 @@ import { startOfWeek, addDays, format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { BookingButton } from '../reservas/booking-button'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Horarios',
   description: 'Consulta los horarios y reserva tu plaza',

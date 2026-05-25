@@ -3,6 +3,8 @@ import { headers } from 'next/headers'
 import { prisma } from '@yogara/database'
 import { TenantHome } from './tenant-home'
 
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage() {
   const headersList = await headers()
   const slug = headersList.get('x-tenant-slug')

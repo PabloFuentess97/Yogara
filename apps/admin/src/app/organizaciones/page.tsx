@@ -1,5 +1,7 @@
 import { prisma } from '@yogara/database'
 
+export const dynamic = 'force-dynamic'
+
 export default async function OrganizacionesPage() {
   const orgs = await prisma.organization.findMany({
     orderBy: { createdAt: 'desc' },

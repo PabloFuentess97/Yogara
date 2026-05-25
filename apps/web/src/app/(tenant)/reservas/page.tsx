@@ -10,6 +10,8 @@ export const metadata: Metadata = {
 import { es } from 'date-fns/locale'
 import { CancelBookingButton } from './cancel-booking-button'
 
+export const dynamic = 'force-dynamic'
+
 export default async function MisReservasPage() {
   const { memberId, organizationId } = await requireStudent()
 

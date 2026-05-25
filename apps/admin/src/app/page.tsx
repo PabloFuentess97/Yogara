@@ -1,5 +1,7 @@
 import { prisma } from '@yogara/database'
 
+export const dynamic = 'force-dynamic'
+
 export default async function SuperAdminDashboard() {
   const [totalOrgs, activeOrgs, totalUsers, totalBookings] = await Promise.all([
     prisma.organization.count(),

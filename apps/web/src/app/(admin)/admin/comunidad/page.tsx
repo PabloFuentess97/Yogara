@@ -1,6 +1,8 @@
 import { prisma } from '@yogara/database'
 import { requireAdmin } from '@/lib/admin-auth'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminComunidadPage() {
   const { organizationId } = await requireAdmin()
 

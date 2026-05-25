@@ -13,6 +13,8 @@ import { CreatePostForm } from './create-post-form'
 import { LikeButton } from './like-button'
 import { CommentSection } from './comment-section'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ComunidadPage() {
   const org = await resolveTenant()
   const student = await optionalStudent()

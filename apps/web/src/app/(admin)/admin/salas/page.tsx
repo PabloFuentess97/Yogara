@@ -2,6 +2,8 @@ import { prisma } from '@yogara/database'
 import { requireAdmin } from '@/lib/admin-auth'
 import { CrearSalaForm } from './crear-sala-form'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminSalasPage() {
   const { organizationId } = await requireAdmin()
 

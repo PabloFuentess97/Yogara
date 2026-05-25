@@ -3,6 +3,8 @@ import { prisma } from '@yogara/database'
 import { ConfigForm } from './config-form'
 import { BillingSection } from './billing-section'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminConfiguracionPage() {
   const { organization, organizationId } = await requireAdmin()
 

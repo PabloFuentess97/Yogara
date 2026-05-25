@@ -6,6 +6,8 @@ import { resolveTenant } from '@/lib/tenant'
 import { optionalStudent } from '@/lib/student-auth'
 import { incrementViewAction } from '../actions'
 
+export const dynamic = 'force-dynamic'
+
 interface Props {
   params: Promise<{ id: string }>
 }

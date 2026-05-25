@@ -2,6 +2,8 @@ import { prisma } from '@yogara/database'
 import { requireAdmin } from '@/lib/admin-auth'
 import { CrearMembresiaForm } from './crear-membresia-form'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminMembresiasPage() {
   const { organizationId } = await requireAdmin()
 

@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { prisma } from '@yogara/database'
 import { resolveTenant } from '@/lib/tenant'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Planes y Precios',
   description: 'Elige el plan que mejor se adapte a tu práctica',

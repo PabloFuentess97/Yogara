@@ -1,5 +1,7 @@
 import { prisma } from '@yogara/database'
 
+export const dynamic = 'force-dynamic'
+
 export default async function PlanesPage() {
   const plans = await prisma.subscriptionPlan.findMany({
     orderBy: { sortOrder: 'asc' },

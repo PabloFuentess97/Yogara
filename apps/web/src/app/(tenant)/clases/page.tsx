@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { prisma } from '@yogara/database'
 import { resolveTenant } from '@/lib/tenant'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Clases',
   description: 'Descubre todas las disciplinas que ofrecemos',

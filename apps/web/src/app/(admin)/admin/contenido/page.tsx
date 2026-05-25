@@ -3,6 +3,8 @@ import { requireAdmin } from '@/lib/admin-auth'
 import { CrearContenidoForm } from './crear-contenido-form'
 import { togglePublicadoAction, eliminarContenidoAction } from './actions'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminContenidoPage() {
   const { organizationId } = await requireAdmin()
 

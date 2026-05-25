@@ -4,6 +4,8 @@ import { prisma } from '@yogara/database'
 import { resolveTenant } from '@/lib/tenant'
 import { optionalStudent } from '@/lib/student-auth'
 
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata(): Promise<Metadata> {
   const org = await resolveTenant()
   return { title: `Contenido On Demand | ${org.name}` }

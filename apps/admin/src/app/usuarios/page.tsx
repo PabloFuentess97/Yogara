@@ -1,5 +1,7 @@
 import { prisma } from '@yogara/database'
 
+export const dynamic = 'force-dynamic'
+
 interface Props {
   searchParams: Promise<{ search?: string }>
 }
