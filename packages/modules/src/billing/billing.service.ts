@@ -1,5 +1,5 @@
 import { prisma } from '@yogara/database'
-import { stripe } from './stripe'
+import { getStripe } from './stripe'
 
 export const billingService = {
   async createCheckoutSession(params: {
@@ -29,7 +29,7 @@ export const billingService = {
     let customerId = org.stripeCustomerId
 
     if (!customerId) {
-      const customer = await stripe.customers.create({
+      const customer = await getStripe().customers.create({
         name: org.name,
         metadata: { organizationId: org.id },
       })
@@ -40,7 +40,7 @@ export const billingService = {
       })
     }
 
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       customer: customerId,
       mode: 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
@@ -61,7 +61,7 @@ export const billingService = {
       throw new Error('Organization does not have a Stripe customer')
     }
 
-    const session = await stripe.billingPortal.sessions.create({
+    const session = await getStripe().billingPortal.sessions.create({
       customer: org.stripeCustomerId,
       return_url: returnUrl,
     })

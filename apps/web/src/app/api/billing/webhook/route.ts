@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { stripe, billingService } from '@yogara/modules'
+import { getStripe, billingService } from '@yogara/modules'
 
 export async function POST(req: NextRequest) {
   const body = await req.text()
@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
 
   let event
   try {
-    event = stripe.webhooks.constructEvent(
+    event = getStripe().webhooks.constructEvent(
       body,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!,
