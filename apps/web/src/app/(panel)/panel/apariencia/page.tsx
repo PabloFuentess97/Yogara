@@ -1,6 +1,7 @@
 import { requirePanelAuth } from '@/lib/panel-auth'
 import { ThemeSelector } from './theme-selector'
 import { BrandingEditor } from './branding-editor'
+import { CustomHtmlSection } from './custom-html-section'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,9 +26,15 @@ export default async function AparienciaPage() {
       </div>
 
       {/* Branding Editor */}
-      <div>
+      <div className="mb-10">
         <h2 className="text-lg font-semibold text-stone-900 mb-4">Contenido y marca</h2>
         <BrandingEditor initialSettings={settings} />
+      </div>
+
+      {/* Custom HTML Landing */}
+      <div>
+        <h2 className="text-lg font-semibold text-stone-900 mb-4">Landing personalizada</h2>
+        <CustomHtmlSection initialHtml={settings.customLandingHtml ?? null} />
       </div>
     </div>
   )

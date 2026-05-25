@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { prisma } from '@yogara/database'
+import { renderCustomHtml } from '@/lib/render-custom-html'
 
 interface Organization {
   id: string
@@ -9,9 +10,45 @@ interface Organization {
   phone: string | null
   address: string | null
   city: string | null
+  logoUrl: string | null
+  settings: any
 }
 
 export async function TenantHome({ org }: { org: Organization }) {
+  // Check for custom landing HTML
+  const customLandingHtml = org.settings?.customLandingHtml
+  if (customLandingHtml && typeof customLandingHtml === 'string' && customLandingHtml.trim() !== '') {
+    const renderedHtml = renderCustomHtml(customLandingHtml, org)
+    return (
+      <div>
+        {/* Simple nav */}
+        <nav className="flex items-center justify-between px-6 py-4 border-b border-stone-200 bg-white">
+          <Link href="/" className="font-semibold text-stone-900">{org.name}</Link>
+          <div className="flex items-center gap-4 text-sm">
+            <Link href="/clases" className="text-stone-600 hover:text-stone-900">Clases</Link>
+            <Link href="/horarios" className="text-stone-600 hover:text-stone-900">Horarios</Link>
+            <Link href="/reservas" className="text-stone-600 hover:text-stone-900">Reservas</Link>
+            <Link href="/login" className="text-stone-600 hover:text-stone-900">Iniciar sesión</Link>
+            <Link href="/registro" className="px-4 py-1.5 rounded-full bg-stone-900 text-white hover:bg-stone-800 transition-colors">Registro</Link>
+          </div>
+        </nav>
+
+        {/* Custom HTML content */}
+        <div dangerouslySetInnerHTML={{ __html: renderedHtml }} />
+
+        {/* Simple footer */}
+        <footer className="px-6 py-8 border-t border-stone-200 bg-stone-50 text-center text-stone-500 text-sm">
+          <div className="flex items-center justify-center gap-4 mb-3">
+            <Link href="/clases" className="hover:text-stone-700">Clases</Link>
+            <Link href="/horarios" className="hover:text-stone-700">Horarios</Link>
+            <Link href="/reservas" className="hover:text-stone-700">Reservas</Link>
+            <Link href="/login" className="hover:text-stone-700">Login</Link>
+          </div>
+          <p>&copy; {new Date().getFullYear()} {org.name}</p>
+        </footer>
+      </div>
+    )
+  }
   const [classTypes, memberships, instructors] = await Promise.all([
     prisma.classType.findMany({
       where: { organizationId: org.id, isActive: true },
