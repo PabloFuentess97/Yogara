@@ -64,11 +64,13 @@ export async function registroAction(formData: FormData) {
   const template = welcomeTemplate({ userName: name, orgName, loginUrl })
   sendEmail({ to: email, ...template }).catch(() => {})
 
+  const redirectTo = slug ? '/' : '/onboarding'
+
   try {
     await signIn('credentials', {
       email,
       password,
-      redirectTo: '/',
+      redirectTo,
     })
   } catch (error) {
     if (error instanceof AuthError) {
