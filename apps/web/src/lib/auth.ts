@@ -5,6 +5,7 @@ import { compare } from 'bcryptjs'
 import { prisma } from '@yogara/database'
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  trustHost: true,
   adapter: PrismaAdapter(prisma) as never,
   session: { strategy: 'jwt' },
   pages: {
