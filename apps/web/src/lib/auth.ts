@@ -4,6 +4,9 @@ import { PrismaAdapter } from '@auth/prisma-adapter'
 import { compare } from 'bcryptjs'
 import { prisma } from '@yogara/database'
 
+const useSecureCookies = process.env.NEXTAUTH_URL?.startsWith('https://')
+const domain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? 'yogara.app'
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   adapter: PrismaAdapter(prisma) as never,
@@ -11,6 +14,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   pages: {
     signIn: '/login',
     newUser: '/registro',
+  },
+  cookies: {
+    sessionToken: {
+      name: useSecureCookies ? '__Secure-authjs.session-token' : 'authjs.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: useSecureCookies,
+        domain: `.${domain}`,
+      },
+    },
   },
   providers: [
     Credentials({
