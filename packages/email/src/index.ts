@@ -1,0 +1,6 @@
+export { emailClient, sendEmail } from './client'
+export { bookingConfirmedTemplate } from './templates/booking-confirmed'
+export { bookingCancelledTemplate } from './templates/booking-cancelled'
+export { welcomeTemplate } from './templates/welcome'
+export { classReminderTemplate } from './templates/class-reminder'
+export { membershipExpiringTemplate } from './templates/membership-expiring'

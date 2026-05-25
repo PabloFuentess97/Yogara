@@ -1,0 +1,674 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum MemberRole {
+  ORG_ADMIN
+  INSTRUCTOR
+  STUDENT
+}
+
+enum MemberStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  INACTIVE
+}
+
+enum ClassLevel {
+  ALL
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum SessionStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+  WAITLISTED
+  CHECKED_IN
+  NO_SHOW
+}
+
+enum MembershipType {
+  UNLIMITED
+  CLASS_PACK
+  DROP_IN
+  FREE_TRIAL
+}
+
+enum UserMembershipStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  FROZEN
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  TRANSFER
+  STRIPE
+  OTHER
+}
+
+enum RetreatStatus {
+  DRAFT
+  PUBLISHED
+  FULL
+  COMPLETED
+  CANCELLED
+}
+
+enum RetreatBookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+enum NotificationType {
+  BOOKING_CONFIRMED
+  BOOKING_CANCELLED
+  CLASS_REMINDER
+  MEMBERSHIP_EXPIRING
+  COMMUNITY_MENTION
+  GENERAL
+}
+
+enum SslStatus {
+  PENDING
+  ACTIVE
+  ERROR
+}
+
+// ============================================================
+// PLATAFORMA
+// ============================================================
+
+model Organization {
+  id                    String             @id @default(uuid()) @db.Uuid
+  name                  String
+  slug                  String             @unique
+  logoUrl               String?            @map("logo_url")
+  description           String?
+  email                 String
+  phone                 String?
+  address               String?
+  city                  String?
+  country               String             @default("ES")
+  timezone              String             @default("Europe/Madrid")
+  currency              String             @default("EUR")
+  themeId               String             @map("theme_id")
+  settings              Json               @default("{}")
+  stripeCustomerId      String?            @unique @map("stripe_customer_id")
+  subscriptionStatus    SubscriptionStatus @default(TRIALING) @map("subscription_status")
+  subscriptionPlanId    String?            @map("subscription_plan_id") @db.Uuid
+  isActive              Boolean            @default(true) @map("is_active")
+  createdAt             DateTime           @default(now()) @map("created_at")
+  updatedAt             DateTime           @updatedAt @map("updated_at")
+  deletedAt             DateTime?          @map("deleted_at")
+
+  subscriptionPlan      SubscriptionPlan?  @relation(fields: [subscriptionPlanId], references: [id])
+  members               OrganizationMember[]
+  customDomains         CustomDomain[]
+  rooms                 Room[]
+  classTypes            ClassType[]
+  schedules             Schedule[]
+  classSessions         ClassSession[]
+  bookings              Booking[]
+  memberships           Membership[]
+  userMemberships       UserMembership[]
+  communityPosts        CommunityPost[]
+  communityComments     CommunityComment[]
+  communityLikes        CommunityLike[]
+  retreats              Retreat[]
+  retreatBookings       RetreatBooking[]
+  onlineContents        OnlineContent[]
+  notifications         Notification[]
+  auditLogs             AuditLog[]
+
+  @@index([slug])
+  @@index([isActive])
+  @@map("organizations")
+}
+
+model CustomDomain {
+  id              String       @id @default(uuid()) @db.Uuid
+  organizationId  String       @map("organization_id") @db.Uuid
+  domain          String       @unique
+  verified        Boolean      @default(false)
+  sslStatus       SslStatus    @default(PENDING) @map("ssl_status")
+  createdAt       DateTime     @default(now()) @map("created_at")
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([domain])
+  @@map("custom_domains")
+}
+
+model SubscriptionPlan {
+  id                    String         @id @default(uuid()) @db.Uuid
+  name                  String
+  slug                  String         @unique
+  description           String?
+  priceMonthly          Decimal        @map("price_monthly") @db.Decimal(10, 2)
+  priceYearly           Decimal        @map("price_yearly") @db.Decimal(10, 2)
+  stripePriceIdMonthly  String?        @map("stripe_price_id_monthly")
+  stripePriceIdYearly   String?        @map("stripe_price_id_yearly")
+  maxStudents           Int            @map("max_students")
+  maxInstructors        Int            @map("max_instructors")
+  maxClasses            Int            @map("max_classes")
+  features              Json           @default("{}")
+  isActive              Boolean        @default(true) @map("is_active")
+  sortOrder             Int            @default(0) @map("sort_order")
+  createdAt             DateTime       @default(now()) @map("created_at")
+  updatedAt             DateTime       @updatedAt @map("updated_at")
+
+  organizations         Organization[]
+
+  @@map("subscription_plans")
+}
+
+// ============================================================
+// USUARIOS
+// ============================================================
+
+model User {
+  id                String               @id @default(uuid()) @db.Uuid
+  email             String               @unique
+  name              String
+  avatarUrl         String?              @map("avatar_url")
+  phone             String?
+  emailVerified     DateTime?            @map("email_verified")
+  passwordHash      String?              @map("password_hash")
+  isPlatformAdmin   Boolean              @default(false) @map("is_platform_admin")
+  lastLoginAt       DateTime?            @map("last_login_at")
+  createdAt         DateTime             @default(now()) @map("created_at")
+  updatedAt         DateTime             @updatedAt @map("updated_at")
+  deletedAt         DateTime?            @map("deleted_at")
+
+  memberships       OrganizationMember[]
+  accounts          Account[]
+  sessions          Session[]
+  auditLogs         AuditLog[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(uuid()) @db.Uuid
+  userId            String  @map("user_id") @db.Uuid
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refreshToken      String? @map("refresh_token") @db.Text
+  accessToken       String? @map("access_token") @db.Text
+  expiresAt         Int?    @map("expires_at")
+  tokenType         String? @map("token_type")
+  scope             String?
+  idToken           String? @map("id_token") @db.Text
+  sessionState      String? @map("session_state")
+
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(uuid()) @db.Uuid
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id") @db.Uuid
+  expires      DateTime
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model OrganizationMember {
+  id               String       @id @default(uuid()) @db.Uuid
+  organizationId   String       @map("organization_id") @db.Uuid
+  userId           String       @map("user_id") @db.Uuid
+  role             MemberRole   @default(STUDENT)
+  status           MemberStatus @default(ACTIVE)
+  joinedAt         DateTime     @default(now()) @map("joined_at")
+  notes            String?
+  tags             String[]     @default([])
+  emergencyContact String?      @map("emergency_contact")
+  emergencyPhone   String?      @map("emergency_phone")
+  medicalNotes     String?      @map("medical_notes")
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+
+  organization     Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookings         Booking[]
+  userMemberships  UserMembership[]
+  instructedSessions   ClassSession[] @relation("instructor")
+  instructedSchedules  Schedule[]     @relation("scheduleInstructor")
+  communityPosts       CommunityPost[]
+  communityComments    CommunityComment[]
+  communityLikes       CommunityLike[]
+  retreatBookings      RetreatBooking[]
+  instructedContent    OnlineContent[]
+  notifications        Notification[]
+
+  @@unique([organizationId, userId])
+  @@index([organizationId])
+  @@index([userId])
+  @@index([organizationId, role])
+  @@map("organization_members")
+}
+
+// ============================================================
+// CLASES Y HORARIOS
+// ============================================================
+
+model Room {
+  id              String       @id @default(uuid()) @db.Uuid
+  organizationId  String       @map("organization_id") @db.Uuid
+  name            String
+  capacity        Int
+  description     String?
+  isActive        Boolean      @default(true) @map("is_active")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  schedules       Schedule[]
+  classSessions   ClassSession[]
+
+  @@index([organizationId])
+  @@map("rooms")
+}
+
+model ClassType {
+  id              String       @id @default(uuid()) @db.Uuid
+  organizationId  String       @map("organization_id") @db.Uuid
+  name            String
+  slug            String
+  description     String?
+  durationMinutes Int          @map("duration_minutes")
+  color           String?
+  imageUrl        String?      @map("image_url")
+  level           ClassLevel   @default(ALL)
+  isActive        Boolean      @default(true) @map("is_active")
+  sortOrder       Int          @default(0) @map("sort_order")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  schedules       Schedule[]
+  classSessions   ClassSession[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+  @@map("class_types")
+}
+
+model Schedule {
+  id              String       @id @default(uuid()) @db.Uuid
+  organizationId  String       @map("organization_id") @db.Uuid
+  classTypeId     String       @map("class_type_id") @db.Uuid
+  instructorId    String       @map("instructor_id") @db.Uuid
+  roomId          String       @map("room_id") @db.Uuid
+  dayOfWeek       Int          @map("day_of_week")
+  startTime       String       @map("start_time")
+  endTime         String       @map("end_time")
+  capacity        Int
+  isActive        Boolean      @default(true) @map("is_active")
+  validFrom       DateTime     @map("valid_from")
+  validUntil      DateTime?    @map("valid_until")
+  recurrenceRule  String?      @map("recurrence_rule")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  organization    Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  classType       ClassType          @relation(fields: [classTypeId], references: [id])
+  instructor      OrganizationMember @relation("scheduleInstructor", fields: [instructorId], references: [id])
+  room            Room               @relation(fields: [roomId], references: [id])
+  classSessions   ClassSession[]
+
+  @@index([organizationId])
+  @@index([organizationId, dayOfWeek])
+  @@map("schedules")
+}
+
+model ClassSession {
+  id              String        @id @default(uuid()) @db.Uuid
+  organizationId  String        @map("organization_id") @db.Uuid
+  scheduleId      String?       @map("schedule_id") @db.Uuid
+  classTypeId     String        @map("class_type_id") @db.Uuid
+  instructorId    String        @map("instructor_id") @db.Uuid
+  roomId          String?       @map("room_id") @db.Uuid
+  date            DateTime
+  startTime       String        @map("start_time")
+  endTime         String        @map("end_time")
+  capacity        Int
+  bookedCount     Int           @default(0) @map("booked_count")
+  status          SessionStatus @default(SCHEDULED)
+  isOnline        Boolean       @default(false) @map("is_online")
+  onlineUrl       String?       @map("online_url")
+  notes           String?
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  organization    Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  schedule        Schedule?          @relation(fields: [scheduleId], references: [id])
+  classType       ClassType          @relation(fields: [classTypeId], references: [id])
+  instructor      OrganizationMember @relation("instructor", fields: [instructorId], references: [id])
+  room            Room?              @relation(fields: [roomId], references: [id])
+  bookings        Booking[]
+
+  @@index([organizationId])
+  @@index([organizationId, date])
+  @@index([organizationId, status])
+  @@map("class_sessions")
+}
+
+model Booking {
+  id              String        @id @default(uuid()) @db.Uuid
+  organizationId  String        @map("organization_id") @db.Uuid
+  classSessionId  String        @map("class_session_id") @db.Uuid
+  memberId        String        @map("member_id") @db.Uuid
+  status          BookingStatus @default(CONFIRMED)
+  bookedAt        DateTime      @default(now()) @map("booked_at")
+  cancelledAt     DateTime?     @map("cancelled_at")
+  checkedInAt     DateTime?     @map("checked_in_at")
+  waitlistPosition Int?         @map("waitlist_position")
+  checkInCode     String        @default(uuid()) @map("check_in_code")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  organization    Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  classSession    ClassSession       @relation(fields: [classSessionId], references: [id])
+  member          OrganizationMember @relation(fields: [memberId], references: [id])
+
+  @@unique([classSessionId, memberId])
+  @@index([organizationId])
+  @@index([organizationId, memberId])
+  @@index([checkInCode])
+  @@map("bookings")
+}
+
+// ============================================================
+// MEMBRESÍAS
+// ============================================================
+
+model Membership {
+  id              String         @id @default(uuid()) @db.Uuid
+  organizationId  String         @map("organization_id") @db.Uuid
+  name            String
+  description     String?
+  type            MembershipType
+  price           Decimal        @db.Decimal(10, 2)
+  currency        String         @default("EUR")
+  durationDays    Int?           @map("duration_days")
+  classLimit      Int?           @map("class_limit")
+  isActive        Boolean        @default(true) @map("is_active")
+  sortOrder       Int            @default(0) @map("sort_order")
+  stripePriceId   String?        @map("stripe_price_id")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userMemberships UserMembership[]
+
+  @@index([organizationId])
+  @@map("memberships")
+}
+
+model UserMembership {
+  id               String               @id @default(uuid()) @db.Uuid
+  organizationId   String               @map("organization_id") @db.Uuid
+  memberId         String               @map("member_id") @db.Uuid
+  membershipId     String               @map("membership_id") @db.Uuid
+  status           UserMembershipStatus @default(ACTIVE)
+  startsAt         DateTime             @map("starts_at")
+  expiresAt        DateTime?            @map("expires_at")
+  classesRemaining Int?                 @map("classes_remaining")
+  classesUsed      Int                  @default(0) @map("classes_used")
+  paymentMethod    PaymentMethod        @default(CASH) @map("payment_method")
+  paymentReference String?              @map("payment_reference")
+  autoRenew        Boolean              @default(false) @map("auto_renew")
+  createdAt        DateTime             @default(now()) @map("created_at")
+  updatedAt        DateTime             @updatedAt @map("updated_at")
+
+  organization     Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  member           OrganizationMember @relation(fields: [memberId], references: [id])
+  membership       Membership         @relation(fields: [membershipId], references: [id])
+
+  @@index([organizationId])
+  @@index([organizationId, memberId])
+  @@index([organizationId, status])
+  @@map("user_memberships")
+}
+
+// ============================================================
+// COMUNIDAD
+// ============================================================
+
+model CommunityPost {
+  id              String       @id @default(uuid()) @db.Uuid
+  organizationId  String       @map("organization_id") @db.Uuid
+  authorId        String       @map("author_id") @db.Uuid
+  content         String
+  imageUrls       String[]     @default([]) @map("image_urls")
+  likesCount      Int          @default(0) @map("likes_count")
+  commentsCount   Int          @default(0) @map("comments_count")
+  isPinned        Boolean      @default(false) @map("is_pinned")
+  isVisible       Boolean      @default(true) @map("is_visible")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+  deletedAt       DateTime?    @map("deleted_at")
+
+  organization    Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  author          OrganizationMember @relation(fields: [authorId], references: [id])
+  comments        CommunityComment[]
+  likes           CommunityLike[]
+
+  @@index([organizationId])
+  @@index([organizationId, createdAt])
+  @@map("community_posts")
+}
+
+model CommunityComment {
+  id              String       @id @default(uuid()) @db.Uuid
+  organizationId  String       @map("organization_id") @db.Uuid
+  postId          String       @map("post_id") @db.Uuid
+  authorId        String       @map("author_id") @db.Uuid
+  content         String
+  parentId        String?      @map("parent_id") @db.Uuid
+  isVisible       Boolean      @default(true) @map("is_visible")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  deletedAt       DateTime?    @map("deleted_at")
+
+  organization    Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  post            CommunityPost      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author          OrganizationMember @relation(fields: [authorId], references: [id])
+  parent          CommunityComment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies         CommunityComment[] @relation("CommentReplies")
+
+  @@index([organizationId])
+  @@index([postId])
+  @@map("community_comments")
+}
+
+model CommunityLike {
+  id              String       @id @default(uuid()) @db.Uuid
+  organizationId  String       @map("organization_id") @db.Uuid
+  postId          String       @map("post_id") @db.Uuid
+  memberId        String       @map("member_id") @db.Uuid
+  createdAt       DateTime     @default(now()) @map("created_at")
+
+  organization    Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  post            CommunityPost      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  member          OrganizationMember @relation(fields: [memberId], references: [id])
+
+  @@unique([postId, memberId])
+  @@index([organizationId])
+  @@map("community_likes")
+}
+
+// ============================================================
+// RETIROS
+// ============================================================
+
+model Retreat {
+  id               String        @id @default(uuid()) @db.Uuid
+  organizationId   String        @map("organization_id") @db.Uuid
+  name             String
+  slug             String
+  description      String
+  shortDescription String?       @map("short_description")
+  location         String
+  imageUrls        String[]      @default([]) @map("image_urls")
+  startDate        DateTime      @map("start_date")
+  endDate          DateTime      @map("end_date")
+  capacity         Int
+  bookedCount      Int           @default(0) @map("booked_count")
+  price            Decimal       @db.Decimal(10, 2)
+  currency         String        @default("EUR")
+  includes         String[]      @default([])
+  status           RetreatStatus @default(DRAFT)
+  paymentMethod    PaymentMethod @default(CASH) @map("payment_method")
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+  deletedAt        DateTime?     @map("deleted_at")
+
+  organization     Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  retreatBookings  RetreatBooking[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+  @@map("retreats")
+}
+
+model RetreatBooking {
+  id               String              @id @default(uuid()) @db.Uuid
+  organizationId   String              @map("organization_id") @db.Uuid
+  retreatId        String              @map("retreat_id") @db.Uuid
+  memberId         String              @map("member_id") @db.Uuid
+  status           RetreatBookingStatus @default(PENDING)
+  amountPaid       Decimal?            @map("amount_paid") @db.Decimal(10, 2)
+  paymentMethod    PaymentMethod       @default(CASH) @map("payment_method")
+  paymentReference String?             @map("payment_reference")
+  notes            String?
+  createdAt        DateTime            @default(now()) @map("created_at")
+  updatedAt        DateTime            @updatedAt @map("updated_at")
+
+  organization     Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  retreat          Retreat            @relation(fields: [retreatId], references: [id])
+  member           OrganizationMember @relation(fields: [memberId], references: [id])
+
+  @@unique([retreatId, memberId])
+  @@index([organizationId])
+  @@map("retreat_bookings")
+}
+
+// ============================================================
+// CONTENIDO ONLINE
+// ============================================================
+
+model OnlineContent {
+  id                String       @id @default(uuid()) @db.Uuid
+  organizationId    String       @map("organization_id") @db.Uuid
+  title             String
+  description       String?
+  videoUrl          String       @map("video_url")
+  thumbnailUrl      String?      @map("thumbnail_url")
+  durationMinutes   Int          @map("duration_minutes")
+  category          String
+  level             ClassLevel   @default(ALL)
+  instructorId      String       @map("instructor_id") @db.Uuid
+  isPublished       Boolean      @default(false) @map("is_published")
+  viewsCount        Int          @default(0) @map("views_count")
+  sortOrder         Int          @default(0) @map("sort_order")
+  requiresMembership Boolean     @default(true) @map("requires_membership")
+  createdAt         DateTime     @default(now()) @map("created_at")
+  updatedAt         DateTime     @updatedAt @map("updated_at")
+
+  organization      Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  instructor        OrganizationMember @relation(fields: [instructorId], references: [id])
+
+  @@index([organizationId])
+  @@index([organizationId, category])
+  @@map("online_contents")
+}
+
+// ============================================================
+// NOTIFICACIONES Y AUDITORÍA
+// ============================================================
+
+model Notification {
+  id              String           @id @default(uuid()) @db.Uuid
+  organizationId  String           @map("organization_id") @db.Uuid
+  memberId        String           @map("member_id") @db.Uuid
+  type            NotificationType
+  title           String
+  body            String
+  isRead          Boolean          @default(false) @map("is_read")
+  actionUrl       String?          @map("action_url")
+  createdAt       DateTime         @default(now()) @map("created_at")
+
+  organization    Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  member          OrganizationMember @relation(fields: [memberId], references: [id])
+
+  @@index([organizationId, memberId])
+  @@index([organizationId, memberId, isRead])
+  @@map("notifications")
+}
+
+model AuditLog {
+  id              String        @id @default(uuid()) @db.Uuid
+  organizationId  String?       @map("organization_id") @db.Uuid
+  userId          String        @map("user_id") @db.Uuid
+  action          String
+  entityType      String        @map("entity_type")
+  entityId        String        @map("entity_id") @db.Uuid
+  changes         Json?
+  ipAddress       String?       @map("ip_address")
+  createdAt       DateTime      @default(now()) @map("created_at")
+
+  organization    Organization? @relation(fields: [organizationId], references: [id])
+  user            User          @relation(fields: [userId], references: [id])
+
+  @@index([organizationId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
