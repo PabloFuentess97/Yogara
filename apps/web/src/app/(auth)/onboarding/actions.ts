@@ -39,17 +39,20 @@ export async function createOrganizationAction(formData: FormData) {
     return { error: 'Ese slug ya está en uso. Elige otro.' }
   }
 
+  const userEmail = session.user.email ?? ''
+
   const org = await prisma.organization.create({
     data: {
       name,
       slug,
+      email: userEmail,
       themeId: theme,
       isActive: true,
       subscriptionStatus: 'TRIALING',
     },
   })
 
-  await prisma.member.create({
+  await prisma.organizationMember.create({
     data: {
       organizationId: org.id,
       userId: session.user.id,
