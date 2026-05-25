@@ -1,4 +1,4 @@
-export { emailClient, sendEmail } from './client'
+export { sendEmail } from './client'
 export { bookingConfirmedTemplate } from './templates/booking-confirmed'
 export { bookingCancelledTemplate } from './templates/booking-cancelled'
 export { welcomeTemplate } from './templates/welcome'
