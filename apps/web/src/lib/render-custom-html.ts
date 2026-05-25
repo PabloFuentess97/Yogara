@@ -31,3 +31,19 @@ export function renderCustomHtml(html: string, org: {
   }
   return result
 }
+
+export function getCustomBlock(
+  settings: Record<string, unknown>,
+  blockId: string
+): string | null {
+  const blocks = (settings as any)?.customBlocks
+  if (!blocks || !blocks[blockId]) return null
+  return blocks[blockId] as string
+}
+
+export function renderBlock(
+  html: string,
+  org: { name: string; description: string | null; email: string; phone: string | null; address: string | null; city: string | null; logoUrl: string | null; settings: any }
+): string {
+  return renderCustomHtml(html, org)
+}

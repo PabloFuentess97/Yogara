@@ -31,10 +31,10 @@ export default async function AparienciaPage() {
         <BrandingEditor initialSettings={settings} />
       </div>
 
-      {/* Custom HTML Landing */}
+      {/* Block-based Custom HTML */}
       <div>
         <h2 className="text-lg font-semibold text-stone-900 mb-4">Landing personalizada</h2>
-        <CustomHtmlSection initialHtml={settings.customLandingHtml ?? null} />
+        <CustomHtmlSection initialBlocks={(settings.customBlocks as Record<string, string>) ?? {}} />
       </div>
     </div>
   )
