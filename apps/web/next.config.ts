@@ -20,6 +20,7 @@ const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb',
+      allowedOrigins: ['yogara.app', '*.yogara.app'],
     },
   },
 }

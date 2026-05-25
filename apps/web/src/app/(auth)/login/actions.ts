@@ -1,7 +1,7 @@
 'use server'
 
 import { signIn } from '@/lib/auth'
-import { redirect } from 'next/navigation'
+import { AuthError } from 'next-auth'
 
 export async function loginAction(formData: FormData) {
   const email = formData.get('email') as string
@@ -11,11 +11,12 @@ export async function loginAction(formData: FormData) {
     await signIn('credentials', {
       email,
       password,
-      redirect: false,
+      redirectTo: '/',
     })
-  } catch {
-    return { error: 'Email o contraseña incorrectos' }
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return { error: 'Email o contraseña incorrectos' }
+    }
+    throw error
   }
-
-  redirect('/')
 }

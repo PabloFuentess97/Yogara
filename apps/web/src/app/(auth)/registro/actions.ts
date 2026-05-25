@@ -3,7 +3,7 @@
 import { hash } from 'bcryptjs'
 import { prisma } from '@yogara/database'
 import { signIn } from '@/lib/auth'
-import { redirect } from 'next/navigation'
+import { AuthError } from 'next-auth'
 import { headers } from 'next/headers'
 import { z } from 'zod'
 import { sendEmail, welcomeTemplate } from '@yogara/email'
@@ -68,11 +68,12 @@ export async function registroAction(formData: FormData) {
     await signIn('credentials', {
       email,
       password,
-      redirect: false,
+      redirectTo: '/',
     })
-  } catch {
-    return { error: 'Cuenta creada. Por favor inicia sesión.' }
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return { error: 'Cuenta creada. Por favor inicia sesión.' }
+    }
+    throw error
   }
-
-  redirect('/')
 }
