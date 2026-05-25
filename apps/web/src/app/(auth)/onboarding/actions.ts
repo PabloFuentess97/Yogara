@@ -43,7 +43,7 @@ export async function createOrganizationAction(formData: FormData) {
     data: {
       name,
       slug,
-      theme,
+      themeId: theme,
       isActive: true,
       subscriptionStatus: 'TRIALING',
     },
