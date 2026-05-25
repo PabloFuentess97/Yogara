@@ -1,6 +1,15 @@
 import type { ContactoSectionProps } from '../../../engine/types'
+import { getSetting } from '../../../engine/settings'
 
 export function ContactoSection({ org }: ContactoSectionProps) {
+  const settings = org.settings as Record<string, unknown>
+  const contact = getSetting<Record<string, string> | undefined>(settings, 'contact', undefined)
+  const whatsapp = getSetting<string>(settings, 'socialMedia.whatsapp', '')
+
+  const email = contact?.email || org.email
+  const phone = contact?.phone || org.phone
+  const address = contact?.address || org.address
+
   return (
     <section className="py-20 px-6">
       <div className="max-w-4xl mx-auto">
@@ -13,25 +22,33 @@ export function ContactoSection({ org }: ContactoSectionProps) {
               ¿Tienes alguna pregunta? No dudes en contactarnos.
             </p>
             <div className="space-y-3 text-sm text-stone-700">
-              {org.address && (
+              {address && (
                 <div className="flex items-start gap-3">
                   <span className="mt-0.5">📍</span>
-                  <span>{org.address}{org.city ? `, ${org.city}` : ''}</span>
+                  <span>{address}{org.city ? `, ${org.city}` : ''}</span>
                 </div>
               )}
-              {org.email && (
+              {email && (
                 <div className="flex items-center gap-3">
                   <span>✉️</span>
-                  <a href={`mailto:${org.email}`} className="hover:text-stone-900 transition-colors">
-                    {org.email}
+                  <a href={`mailto:${email}`} className="hover:text-stone-900 transition-colors">
+                    {email}
                   </a>
                 </div>
               )}
-              {org.phone && (
+              {phone && (
                 <div className="flex items-center gap-3">
                   <span>📞</span>
-                  <a href={`tel:${org.phone}`} className="hover:text-stone-900 transition-colors">
-                    {org.phone}
+                  <a href={`tel:${phone}`} className="hover:text-stone-900 transition-colors">
+                    {phone}
+                  </a>
+                </div>
+              )}
+              {whatsapp && (
+                <div className="flex items-center gap-3">
+                  <span>💬</span>
+                  <a href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="hover:text-stone-900 transition-colors">
+                    WhatsApp
                   </a>
                 </div>
               )}

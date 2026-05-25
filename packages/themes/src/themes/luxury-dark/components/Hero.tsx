@@ -1,7 +1,11 @@
 import Link from 'next/link'
 import type { HeroProps } from '../../../engine/types'
+import { getSetting } from '../../../engine/settings'
 
 export function Hero({ org, title, subtitle, backgroundImage }: HeroProps) {
+  const settings = org.settings as Record<string, unknown>
+  const ctaText = getSetting<string>(settings, 'hero.ctaText', 'Reservar clase')
+  const ctaLink = getSetting<string>(settings, 'hero.ctaLink', '/horarios')
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Video/Image background placeholder */}
@@ -43,10 +47,10 @@ export function Hero({ org, title, subtitle, backgroundImage }: HeroProps) {
 
         <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-5">
           <Link
-            href="/horarios"
+            href={ctaLink}
             className="px-10 py-4 bg-[#D4AF37] text-[#0A0A0A] font-medium text-sm tracking-wider uppercase hover:bg-[#F5E6C8] transition-all duration-300 hover:shadow-[0_0_30px_rgba(212,175,55,0.3)]"
           >
-            Reservar clase
+            {ctaText}
           </Link>
           <Link
             href="/clases"

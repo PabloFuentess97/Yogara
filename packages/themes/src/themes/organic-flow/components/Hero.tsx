@@ -1,7 +1,11 @@
 import Link from 'next/link'
 import type { HeroProps } from '../../../engine/types'
+import { getSetting } from '../../../engine/settings'
 
 export function Hero({ org, title, subtitle, backgroundImage }: HeroProps) {
+  const settings = org.settings as Record<string, unknown>
+  const ctaText = getSetting<string>(settings, 'hero.ctaText', 'Ver horarios')
+  const ctaLink = getSetting<string>(settings, 'hero.ctaLink', '/horarios')
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden bg-[#F5F0EB]">
       {/* Decorative background shapes */}
@@ -33,10 +37,10 @@ export function Hero({ org, title, subtitle, backgroundImage }: HeroProps) {
 
           <div className="flex flex-col sm:flex-row items-start gap-4 pt-2">
             <Link
-              href="/horarios"
+              href={ctaLink}
               className="px-8 py-4 rounded-2xl bg-[#5B7A5E] text-white font-medium hover:bg-[#4A6A4D] transition-all hover:shadow-lg hover:shadow-[#5B7A5E]/20 hover:-translate-y-0.5"
             >
-              Ver horarios
+              {ctaText}
             </Link>
             <Link
               href="/clases"

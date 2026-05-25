@@ -3,10 +3,14 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import type { NavbarProps } from '../../../engine/types'
+import { getSetting } from '../../../engine/settings'
 
 export function Navbar({ org, isLoggedIn }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const settings = org.settings as Record<string, unknown>
+  const brandLogoUrl = getSetting<string>(settings, 'brand.logoUrl', '') || org.logoUrl
+  const brandName = getSetting<string>(settings, 'brand.name', '') || org.name
 
   useEffect(() => {
     const handleScroll = () => {
@@ -34,11 +38,11 @@ export function Navbar({ org, isLoggedIn }: NavbarProps) {
     >
       <div className="max-w-7xl mx-auto px-6 h-18 flex items-center justify-between py-4">
         <Link href="/" className="flex items-center gap-3">
-          {org.logoUrl && (
-            <img src={org.logoUrl} alt={org.name} className="h-9 w-9 object-contain rounded-full" />
+          {brandLogoUrl && (
+            <img src={brandLogoUrl} alt={brandName} className="h-9 w-9 object-contain rounded-full" />
           )}
           <span className="font-serif text-xl font-bold text-[#2D2D2D] tracking-tight">
-            {org.name}
+            {brandName}
           </span>
         </Link>
 

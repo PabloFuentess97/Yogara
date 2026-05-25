@@ -3,9 +3,13 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import type { NavbarProps } from '../../../engine/types'
+import { getSetting } from '../../../engine/settings'
 
 export function Navbar({ org, isLoggedIn }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const settings = org.settings as Record<string, unknown>
+  const brandLogoUrl = getSetting<string>(settings, 'brand.logoUrl', '') || org.logoUrl
+  const brandName = getSetting<string>(settings, 'brand.name', '') || org.name
 
   const links = [
     { href: '/clases', label: 'Clases' },
@@ -19,14 +23,14 @@ export function Navbar({ org, isLoggedIn }: NavbarProps) {
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#0A0A0A]/80 backdrop-blur-xl border-b border-[#D4AF37]/10">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
-          {org.logoUrl && (
-            <img src={org.logoUrl} alt={org.name} className="h-9 w-9 object-contain" />
+          {brandLogoUrl && (
+            <img src={brandLogoUrl} alt={brandName} className="h-9 w-9 object-contain" />
           )}
           <span
             className="text-2xl font-light tracking-wider text-[#D4AF37]"
             style={{ fontFamily: 'Cormorant Garamond, serif' }}
           >
-            {org.name}
+            {brandName}
           </span>
         </Link>
 
