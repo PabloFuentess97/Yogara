@@ -16,15 +16,9 @@ export async function loginAction(formData: FormData) {
   if (!slug) {
     const user = await prisma.user.findUnique({
       where: { email },
-      include: { memberships: { where: { role: 'ORG_ADMIN' }, take: 1, include: { organization: true } } },
+      include: { memberships: { where: { role: 'ORG_ADMIN', status: 'ACTIVE' }, take: 1 } },
     })
-    if (user?.memberships[0]) {
-      const orgSlug = user.memberships[0].organization.slug
-      const domain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? 'yogara.app'
-      redirectTo = `https://${orgSlug}.${domain}/admin`
-    } else {
-      redirectTo = '/onboarding'
-    }
+    redirectTo = user?.memberships[0] ? '/panel' : '/onboarding'
   }
 
   try {

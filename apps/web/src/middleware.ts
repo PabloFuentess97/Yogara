@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 const PUBLIC_ROUTES = ['/', '/clases', '/horarios', '/retiros', '/membresias', '/login', '/registro', '/verificar']
-const AUTH_ROUTES = ['/comunidad', '/perfil', '/reservas', '/online', '/onboarding']
+const AUTH_ROUTES = ['/comunidad', '/perfil', '/reservas', '/online', '/onboarding', '/panel']
 const ADMIN_ROUTES = ['/admin']
 
 function isPublicRoute(pathname: string): boolean {

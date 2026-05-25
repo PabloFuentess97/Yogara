@@ -60,6 +60,5 @@ export async function createOrganizationAction(formData: FormData) {
     },
   })
 
-  const domain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? 'yogara.app'
-  redirect(`https://${slug}.${domain}/admin`)
+  redirect('/panel')
 }
