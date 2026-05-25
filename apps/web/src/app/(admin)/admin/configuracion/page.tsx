@@ -1,6 +1,7 @@
 import { requireAdmin } from '@/lib/admin-auth'
 import { prisma } from '@yogara/database'
 import { ConfigForm } from './config-form'
+import { ThemeSection } from './theme-section'
 import { BillingSection } from './billing-section'
 
 export const dynamic = 'force-dynamic'
@@ -22,6 +23,7 @@ export default async function AdminConfiguracionPage() {
     <div>
       <h1 className="text-2xl font-bold text-stone-900 mb-6">Configuración</h1>
       <ConfigForm org={organization} />
+      <ThemeSection currentThemeId={org.themeId} />
       <BillingSection
         currentPlan={org.subscriptionPlan}
         subscriptionStatus={org.subscriptionStatus}

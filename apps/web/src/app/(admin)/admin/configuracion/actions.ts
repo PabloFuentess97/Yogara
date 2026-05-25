@@ -39,3 +39,21 @@ export async function actualizarConfigAction(formData: FormData) {
   revalidatePath('/admin/configuracion')
   return { success: true }
 }
+
+const VALID_THEMES = ['zen-minimal', 'organic-flow', 'luxury-dark'] as const
+
+export async function updateThemeAction(themeId: string) {
+  const { organizationId } = await requireAdmin()
+
+  if (!VALID_THEMES.includes(themeId as (typeof VALID_THEMES)[number])) {
+    return { error: 'Tema no válido' }
+  }
+
+  await prisma.organization.update({
+    where: { id: organizationId },
+    data: { themeId },
+  })
+
+  revalidatePath('/admin/configuracion')
+  return { success: true }
+}

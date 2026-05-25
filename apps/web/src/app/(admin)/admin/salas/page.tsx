@@ -1,6 +1,7 @@
 import { prisma } from '@yogara/database'
 import { requireAdmin } from '@/lib/admin-auth'
 import { CrearSalaForm } from './crear-sala-form'
+import { SalaCard } from './sala-card'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,13 +28,15 @@ export default async function AdminSalasPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {rooms.map((room) => (
-            <div key={room.id} className="bg-white rounded-xl border border-stone-200 p-5">
-              <h3 className="font-semibold text-stone-900 mb-1">{room.name}</h3>
-              <p className="text-sm text-stone-600">Capacidad: {room.capacity} personas</p>
-              {room.description && (
-                <p className="text-sm text-stone-500 mt-2">{room.description}</p>
-              )}
-            </div>
+            <SalaCard
+              key={room.id}
+              room={{
+                id: room.id,
+                name: room.name,
+                capacity: room.capacity,
+                description: room.description,
+              }}
+            />
           ))}
         </div>
       )}
