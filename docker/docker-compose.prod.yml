@@ -36,6 +36,8 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"
+    volumes:
+      - themes_data:/app/themes-data
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-yogara}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-yogara}
       REDIS_URL: redis://redis:6379
@@ -71,3 +73,4 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  themes_data:

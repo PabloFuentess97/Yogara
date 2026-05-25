@@ -1,9 +1,13 @@
 import Link from 'next/link'
 import { requirePanelAuth } from '@/lib/panel-auth'
+import { prisma } from '@yogara/database'
 
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
-  const { org } = await requirePanelAuth()
+  const { org, user } = await requirePanelAuth()
   const domain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? 'yogara.app'
+
+  const dbUser = await prisma.user.findUnique({ where: { id: user.id! }, select: { isPlatformAdmin: true } })
+  const isPlatformAdmin = dbUser?.isPlatformAdmin ?? false
 
   return (
     <div className="min-h-screen bg-stone-50">
@@ -19,6 +23,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
               <NavLink href="/panel/apariencia">Apariencia</NavLink>
               <NavLink href="/panel/dominio">Dominio</NavLink>
               <NavLink href="/panel/facturacion">Facturación</NavLink>
+              {isPlatformAdmin && <NavLink href="/panel/temas">Temas</NavLink>}
             </nav>
           </div>
           <div className="flex items-center gap-4">

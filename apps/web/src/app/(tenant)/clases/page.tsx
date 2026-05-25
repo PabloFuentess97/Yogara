@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { prisma } from '@yogara/database'
 import { resolveTenant } from '@/lib/tenant'
+import { renderBlock } from '@/lib/render-custom-html'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,12 +26,20 @@ export default async function ClasesPage() {
     ADVANCED: 'Avanzado',
   }
 
+  const classesHeader = org.customTheme?.classesHeader
+
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
-      <h1 className="font-[family-name:var(--font-heading)] text-3xl font-bold text-stone-900 mb-2">
-        Nuestras Clases
-      </h1>
-      <p className="text-stone-600 mb-8">Descubre todas las disciplinas que ofrecemos</p>
+      {classesHeader ? (
+        <div dangerouslySetInnerHTML={{ __html: renderBlock(classesHeader, org) }} />
+      ) : (
+        <>
+          <h1 className="font-[family-name:var(--font-heading)] text-3xl font-bold text-stone-900 mb-2">
+            Nuestras Clases
+          </h1>
+          <p className="text-stone-600 mb-8">Descubre todas las disciplinas que ofrecemos</p>
+        </>
+      )}
 
       {classTypes.length === 0 ? (
         <p className="text-stone-500 text-center py-12">Próximamente publicaremos nuestras clases.</p>

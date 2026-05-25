@@ -122,6 +122,7 @@ model Organization {
   timezone              String             @default("Europe/Madrid")
   currency              String             @default("EUR")
   themeId               String             @map("theme_id")
+  customThemeId         String?            @map("custom_theme_id") @db.Uuid
   settings              Json               @default("{}")
   stripeCustomerId      String?            @unique @map("stripe_customer_id")
   subscriptionStatus    SubscriptionStatus @default(TRIALING) @map("subscription_status")
@@ -132,6 +133,7 @@ model Organization {
   deletedAt             DateTime?          @map("deleted_at")
 
   subscriptionPlan      SubscriptionPlan?  @relation(fields: [subscriptionPlanId], references: [id])
+  customTheme           CustomTheme?       @relation(fields: [customThemeId], references: [id])
   members               OrganizationMember[]
   customDomains         CustomDomain[]
   rooms                 Room[]
@@ -167,6 +169,34 @@ model CustomDomain {
 
   @@index([domain])
   @@map("custom_domains")
+}
+
+model CustomTheme {
+  id              String         @id @default(uuid()) @db.Uuid
+  name            String
+  slug            String         @unique
+  description     String?
+  previewUrl      String?        @map("preview_url")
+  config          Json           @default("{}")
+  navbar          String?        @db.Text
+  hero            String?        @db.Text
+  about           String?        @db.Text
+  clases          String?        @db.Text
+  profesores      String?        @db.Text
+  precios         String?        @db.Text
+  testimonios     String?        @db.Text
+  contacto        String?        @db.Text
+  footer          String?        @db.Text
+  classesHeader   String?        @map("classes_header") @db.Text
+  headHtml        String?        @map("head_html") @db.Text
+  assets          Json           @default("[]")
+  isActive        Boolean        @default(true) @map("is_active")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  organizations   Organization[]
+
+  @@map("custom_themes")
 }
 
 model SubscriptionPlan {

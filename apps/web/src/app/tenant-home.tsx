@@ -2,6 +2,24 @@ import Link from 'next/link'
 import { prisma } from '@yogara/database'
 import { renderCustomHtml, getCustomBlock, renderBlock } from '@/lib/render-custom-html'
 
+interface CustomTheme {
+  id: string
+  name: string
+  slug: string
+  config: any
+  navbar: string | null
+  hero: string | null
+  about: string | null
+  clases: string | null
+  profesores: string | null
+  precios: string | null
+  testimonios: string | null
+  contacto: string | null
+  footer: string | null
+  classesHeader: string | null
+  headHtml: string | null
+}
+
 interface Organization {
   id: string
   name: string
@@ -12,10 +30,12 @@ interface Organization {
   city: string | null
   logoUrl: string | null
   settings: any
+  customTheme?: CustomTheme | null
 }
 
 export async function TenantHome({ org }: { org: Organization }) {
   const settings = (org.settings ?? {}) as Record<string, unknown>
+  const theme = org.customTheme
 
   // Backward compatibility: check for old customLandingHtml
   const customLandingHtml = org.settings?.customLandingHtml
@@ -55,15 +75,15 @@ export async function TenantHome({ org }: { org: Organization }) {
     )
   }
 
-  // Block-based rendering
-  const navbarBlock = getCustomBlock(settings, 'navbar')
-  const heroBlock = getCustomBlock(settings, 'hero')
-  const clasesBlock = getCustomBlock(settings, 'clases')
-  const profesoresBlock = getCustomBlock(settings, 'profesores')
-  const preciosBlock = getCustomBlock(settings, 'precios')
-  const testimoniosBlock = getCustomBlock(settings, 'testimonios')
-  const contactoBlock = getCustomBlock(settings, 'contacto')
-  const footerBlock = getCustomBlock(settings, 'footer')
+  // Block-based rendering (customTheme takes priority over customBlocks)
+  const navbarBlock = theme?.navbar ?? getCustomBlock(settings, 'navbar')
+  const heroBlock = theme?.hero ?? getCustomBlock(settings, 'hero')
+  const clasesBlock = theme?.clases ?? getCustomBlock(settings, 'clases')
+  const profesoresBlock = theme?.profesores ?? getCustomBlock(settings, 'profesores')
+  const preciosBlock = theme?.precios ?? getCustomBlock(settings, 'precios')
+  const testimoniosBlock = theme?.testimonios ?? getCustomBlock(settings, 'testimonios')
+  const contactoBlock = theme?.contacto ?? getCustomBlock(settings, 'contacto')
+  const footerBlock = theme?.footer ?? getCustomBlock(settings, 'footer')
 
   // Fetch data for default sections (only if needed)
   const needsClassTypes = !clasesBlock

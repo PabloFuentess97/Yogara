@@ -25,14 +25,23 @@ export default async function TenantLayout({ children }: { children: React.React
   const isLoggedIn = !!session?.user
 
   const settings = (org.settings ?? {}) as Record<string, unknown>
-  const navbarBlock = getCustomBlock(settings, 'navbar')
-  const footerBlock = getCustomBlock(settings, 'footer')
+  const theme = org.customTheme
+
+  // Priority: customTheme > customBlocks > default
+  const navbarHtml = theme?.navbar ?? getCustomBlock(settings, 'navbar')
+  const footerHtml = theme?.footer ?? getCustomBlock(settings, 'footer')
+  const headHtml = theme?.headHtml ?? null
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Head injection (fonts, CDN, styles) */}
+      {headHtml && (
+        <div dangerouslySetInnerHTML={{ __html: renderBlock(headHtml, org) }} />
+      )}
+
       {/* Navbar */}
-      {navbarBlock ? (
-        <div dangerouslySetInnerHTML={{ __html: renderBlock(navbarBlock, org) }} />
+      {navbarHtml ? (
+        <div dangerouslySetInnerHTML={{ __html: renderBlock(navbarHtml, org) }} />
       ) : (
         <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-200">
           <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -99,8 +108,8 @@ export default async function TenantLayout({ children }: { children: React.React
       <main className="flex-1">{children}</main>
 
       {/* Footer */}
-      {footerBlock ? (
-        <div dangerouslySetInnerHTML={{ __html: renderBlock(footerBlock, org) }} />
+      {footerHtml ? (
+        <div dangerouslySetInnerHTML={{ __html: renderBlock(footerHtml, org) }} />
       ) : (
         <footer className="border-t border-stone-200 bg-white py-8 px-6">
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
